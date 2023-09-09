@@ -53,6 +53,12 @@ stdout: in_colour,
 /// Print to stderr
 stderr: in_colour,
 
+/// CPU Architecture
+arch: []const u8,
+
+/// Operating System
+os: []const u8,
+
 /// Indicator showing that the init is complete
 init_done: bool = false,
 
@@ -87,6 +93,8 @@ pub fn init(allocator: Allocator) Self {
         .stdout = in_colour.init(std.io.getStdOut(), .auto, false),
         .stderr = in_colour.init(std.io.getStdErr(), .auto, false),
 
+        .arch = builtin.target.cpu.arch.genericName(),
+        .os = @tagName(builtin.target.os.tag),
         .init_done = true,
     };
 }
@@ -145,18 +153,6 @@ pub const Command = struct {
 };
 
 //-----------------------------------------------------------------------------
-// Default Environment OS and CPU Architecture Flags
-//-----------------------------------------------------------------------------
-
-pub const isMac = builtin.target.os.tag == .macos;
-pub const isWindows = builtin.target.os.tag == .windows;
-pub const isLinux = builtin.target.os.tag == .linux;
-
-pub const isAarch64 = builtin.target.cpu.arch.isAARCH64();
-pub const isX86 = builtin.target.cpu.arch.isX86();
-pub const isX64 = builtin.target.cpu.arch == .x86_64;
-
-//-----------------------------------------------------------------------------
 // Default Help and Version
 //-----------------------------------------------------------------------------
 
@@ -165,7 +161,7 @@ pub fn printVersionAndExit(self: *Self) noreturn {
     @setCold(true);
 
     const template =
-        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}}
+        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} ({{{app.os}}}/{{{app.arch}}})
         \\{{{app.copyright}}}
         \\
     ;
@@ -175,6 +171,8 @@ pub fn printVersionAndExit(self: *Self) noreturn {
         .app = .{
             .name = self.name,
             .version = self.version,
+            .os = self.os,
+            .arch = self.arch,
             .copyright = self.copyright,
         },
     };
@@ -189,7 +187,7 @@ pub fn printHelpAndExit(self: *Self) noreturn {
     @setCold(true);
 
     const template =
-        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}}
+        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} ({{{app.os}}}/{{{app.arch}}})
         \\{{{app.description}}}
         \\
         \\{{{style.yellow}}}USAGE:{{{style.reset}}}
@@ -207,6 +205,8 @@ pub fn printHelpAndExit(self: *Self) noreturn {
         .app = .{
             .name = self.name,
             .version = self.version,
+            .os = self.os,
+            .arch = self.arch,
             .copyright = self.copyright,
             .description = self.description,
         },
