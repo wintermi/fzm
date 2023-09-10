@@ -152,9 +152,52 @@ pub const Command = struct {
     description: []const u8,
 };
 
+/// Sub Command Help
+///
+/// Minimum set of attributes required to output the default help template
+/// containing a list of sub commands and descriptions
+pub const CommandHelp = struct {
+    name: []const u8,
+    description: []const u8,
+};
+
+/// Returns true if the lhs name < rhs name, false otherwise
+fn lessThanCommandHelp(_: void, lhs: CommandHelp, rhs: CommandHelp) bool {
+    return std.mem.lessThan(u8, lhs.name, rhs.name);
+}
+
 //-----------------------------------------------------------------------------
 // Default Help and Version
 //-----------------------------------------------------------------------------
+
+/// Constructs the data struct that contains all of the CLI attributes into
+/// an acceptable format to be passed to Mustache for processing the provided
+/// template before printing the results to STDOUT
+fn printHelpTemplate(self: *Self, template: []const u8) !usize {
+    var _commands = ArrayList(CommandHelp).init(self.allocator);
+    for (self.commands.items) |command| {
+        _commands.append(.{
+            .name = command.name,
+            .description = command.description,
+        }) catch {};
+    }
+    std.sort.block(CommandHelp, _commands.items, {}, lessThanCommandHelp);
+
+    const data = .{
+        .style = in_colour.ansi_codes,
+        .app = .{
+            .name = self.name,
+            .version = self.version,
+            .os = self.os,
+            .arch = self.arch,
+            .copyright = self.copyright,
+            .description = self.description,
+        },
+        .commands = _commands.items,
+    };
+
+    return self.stdout.mustacheFormat(template, data);
+}
 
 /// Print the default app version text
 pub fn printVersionAndExit(self: *Self) noreturn {
@@ -166,18 +209,7 @@ pub fn printVersionAndExit(self: *Self) noreturn {
         \\
     ;
 
-    const data = .{
-        .style = in_colour.ansi_codes,
-        .app = .{
-            .name = self.name,
-            .version = self.version,
-            .os = self.os,
-            .arch = self.arch,
-            .copyright = self.copyright,
-        },
-    };
-
-    _ = self.stdout.mustacheFormat(template, data) catch {};
+    _ = self.printHelpTemplate(template) catch {};
 
     self.exit(0);
 }
@@ -191,28 +223,19 @@ pub fn printHelpAndExit(self: *Self) noreturn {
         \\{{{app.description}}}
         \\
         \\{{{style.yellow}}}USAGE:{{{style.reset}}}
-        \\   {{{style.green}}}{{{app.name}}}{{{style.reset}}} [COMMAND] [arguments...]
+        \\   {{{style.green}}}{{{app.name}}}{{{style.reset}}} [COMMAND] [OPTIONS] [args]
         \\
         \\{{{style.yellow}}}COMMANDS:{{{style.reset}}}
+        \\{{#commands}}
+        \\  {{{style.green}}}{{{name}}}{{{style.green}}}
+        \\{{/commands}}
         \\
         \\{{{style.yellow}}}COPYRIGHT:{{{style.reset}}}
         \\   {{{app.copyright}}}
         \\
     ;
 
-    const data = .{
-        .style = in_colour.ansi_codes,
-        .app = .{
-            .name = self.name,
-            .version = self.version,
-            .os = self.os,
-            .arch = self.arch,
-            .copyright = self.copyright,
-            .description = self.description,
-        },
-    };
-
-    _ = self.stdout.mustacheFormat(template, data) catch {};
+    _ = self.printHelpTemplate(template) catch {};
 
     self.exit(0);
 }
