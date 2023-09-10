@@ -161,7 +161,7 @@ pub fn printVersionAndExit(self: *Self) noreturn {
     @setCold(true);
 
     const template =
-        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} ({{{app.os}}}/{{{app.arch}}})
+        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} {{{app.os}}}/{{{app.arch}}}
         \\{{{app.copyright}}}
         \\
     ;
@@ -187,7 +187,7 @@ pub fn printHelpAndExit(self: *Self) noreturn {
     @setCold(true);
 
     const template =
-        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} ({{{app.os}}}/{{{app.arch}}})
+        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} {{{app.os}}}/{{{app.arch}}}
         \\{{{app.description}}}
         \\
         \\{{{style.yellow}}}USAGE:{{{style.reset}}}
