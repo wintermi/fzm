@@ -159,11 +159,23 @@ pub const Command = struct {
 pub const CommandHelp = struct {
     name: []const u8,
     description: []const u8,
+    padding: []const u8,
 };
 
 /// Returns true if the lhs name < rhs name, false otherwise
 fn lessThanCommandHelp(_: void, lhs: CommandHelp, rhs: CommandHelp) bool {
     return std.mem.lessThan(u8, lhs.name, rhs.name);
+}
+
+/// Returns a given number of spaces for padding
+fn padSpaces(self: *Self, size: u64) Allocator.Error![]const u8 {
+    var result = std.ArrayList(u8).init(self.allocator);
+    defer result.deinit();
+
+    for (0..size) |_| {
+        try result.append(' ');
+    }
+    return result.toOwnedSlice();
 }
 
 //-----------------------------------------------------------------------------
@@ -174,15 +186,26 @@ fn lessThanCommandHelp(_: void, lhs: CommandHelp, rhs: CommandHelp) bool {
 /// an acceptable format to be passed to Mustache for processing the provided
 /// template before printing the results to STDOUT
 fn printHelpTemplate(self: *Self, template: []const u8) !usize {
-    var _commands = ArrayList(CommandHelp).init(self.allocator);
+    // Calculate maximum command name length
+    var maxNameLength: u64 = 0;
     for (self.commands.items) |command| {
-        _commands.append(.{
+        maxNameLength = @max(maxNameLength, command.name.len);
+    }
+    maxNameLength += 3;
+
+    // Populate Command Help list
+    var commands = ArrayList(CommandHelp).init(self.allocator);
+    defer commands.deinit();
+    for (self.commands.items) |command| {
+        commands.append(.{
             .name = command.name,
             .description = command.description,
+            .padding = try self.padSpaces(maxNameLength - command.name.len),
         }) catch {};
     }
-    std.sort.block(CommandHelp, _commands.items, {}, lessThanCommandHelp);
+    std.sort.block(CommandHelp, commands.items, {}, lessThanCommandHelp);
 
+    // Create Data structure ready for the Mustache Template to be processed
     const data = .{
         .style = in_colour.ansi_codes,
         .app = .{
@@ -193,7 +216,7 @@ fn printHelpTemplate(self: *Self, template: []const u8) !usize {
             .copyright = self.copyright,
             .description = self.description,
         },
-        .commands = _commands.items,
+        .commands = commands.items,
     };
 
     return self.stdout.mustacheFormat(template, data);
@@ -223,11 +246,11 @@ pub fn printHelpAndExit(self: *Self) noreturn {
         \\{{{app.description}}}
         \\
         \\{{{style.yellow}}}USAGE:{{{style.reset}}}
-        \\   {{{style.green}}}{{{app.name}}}{{{style.reset}}} [COMMAND] [OPTIONS] [args]
+        \\   {{{style.green}}}{{{app.name}}}{{{style.reset}}} [command] [options] [args]
         \\
         \\{{{style.yellow}}}COMMANDS:{{{style.reset}}}
         \\{{#commands}}
-        \\  {{{style.green}}}{{{name}}}{{{style.green}}}
+        \\   {{{style.green}}}{{{name}}}{{{style.reset}}}{{{padding}}}{{{description}}}
         \\{{/commands}}
         \\
         \\{{{style.yellow}}}COPYRIGHT:{{{style.reset}}}
