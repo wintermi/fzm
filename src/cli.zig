@@ -113,6 +113,8 @@ pub fn addCommand(self: *Self, command: Command) anyerror!void {
     std.debug.assert(self.init_done);
 
     try self.commands.append(command);
+
+    std.sort.block(Command, self.commands.items, {}, Command.lessThan);
 }
 
 /// Get the Sub Command specified by the provided index
@@ -150,6 +152,11 @@ pub const Command = struct {
     name: []const u8,
     func: *const fn (*Self) noreturn,
     description: []const u8,
+
+    /// Returns true if the lhs name < rhs name, false otherwise
+    fn lessThan(_: void, lhs: Command, rhs: Command) bool {
+        return std.mem.lessThan(u8, lhs.name, rhs.name);
+    }
 };
 
 /// Sub Command Help
@@ -160,12 +167,12 @@ pub const CommandHelp = struct {
     name: []const u8,
     description: []const u8,
     padding: []const u8,
-};
 
-/// Returns true if the lhs name < rhs name, false otherwise
-fn lessThanCommandHelp(_: void, lhs: CommandHelp, rhs: CommandHelp) bool {
-    return std.mem.lessThan(u8, lhs.name, rhs.name);
-}
+    /// Returns true if the lhs name < rhs name, false otherwise
+    fn lessThan(_: void, lhs: CommandHelp, rhs: CommandHelp) bool {
+        return std.mem.lessThan(u8, lhs.name, rhs.name);
+    }
+};
 
 /// Returns a given number of spaces for padding
 fn padSpaces(self: *Self, size: u64) Allocator.Error![]const u8 {
@@ -203,7 +210,6 @@ fn printHelpTemplate(self: *Self, template: []const u8) !usize {
             .padding = try self.padSpaces(maxNameLength - command.name.len),
         }) catch {};
     }
-    std.sort.block(CommandHelp, commands.items, {}, lessThanCommandHelp);
 
     // Create Data structure ready for the Mustache Template to be processed
     const data = .{
