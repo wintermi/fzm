@@ -17,14 +17,13 @@ jobs:
     strategy:
       matrix:
         zig-version:
-          - 0.11.0
           - master
     steps:
-      - uses: actions/checkout@v3.5.3
+      - uses: actions/checkout@v4.1.1
         with:
           submodules: true
       - name: Setup Zig ${{ matrix.zig-version }}
-        uses: goto-bus-stop/setup-zig@v2.1.1
+        uses: goto-bus-stop/setup-zig@v2.2.0
         with:
           version: ${{ matrix.zig-version }}
       - name: Display Zig version
