@@ -1,14 +1,16 @@
 .{
     .name = "fzm",
     .version = "0.1.0",
+    .paths = .{""},
     .dependencies = .{
+        // Zig libs
         .clap = .{
-            .url = "https://github.com/Hejsil/zig-clap/archive/f49b94700e0761b7514abdca0e4f0e7f3f938a93.tar.gz",
-            .hash = "1220f48518ce22882e102255ed3bcdb7aeeb4891f50b2cdd3bd74b5b2e24d3149ba2",
+            .url = "https://github.com/Hejsil/zig-clap/archive/refs/heads/master.tar.gz",
+            .hash = "12202fa30d679d821292bcd953458b9e76097a5d16999489125a206db63a53392833",
         },
         .zap = .{
-            .url = "https://github.com/zigzap/zap/archive/refs/tags/v0.1.10-pre.tar.gz",
-            .hash = "1220a645e8ae84064f3342609f65d1c97e23c292616f5d1040cdf314ca52d7643f8a",
-        },
+            .url = "https://github.com/zigzap/zap/archive/refs/heads/zig-0.12.0.tar.gz",
+            .hash = "12203e381b737b077759d3c63a1752fe79bb35dd50d1122a329a3f7b4504156d5595",
+        }
     },
 }

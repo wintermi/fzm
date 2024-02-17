@@ -18,12 +18,12 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const clap = b.dependency("clap", .{
+    const clap_dep = b.dependency("clap", .{
         .target = target,
         .optimize = optimize,
     });
 
-    const zap = b.dependency("zap", .{
+    const zap_dep = b.dependency("zap", .{
         .target = target,
         .optimize = optimize,
     });
@@ -34,10 +34,9 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe.addModule("clap", clap.module("clap"));
-    exe.addModule("zap", zap.module("zap"));
-    exe.linkLibrary(zap.artifact("facil.io"));
-
+    exe.root_module.addImport("clap", clap_dep.module("clap"));
+    exe.root_module.addImport("zap", zap_dep.module("zap"));
+    exe.linkLibrary(zap_dep.artifact("facil.io"));
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);

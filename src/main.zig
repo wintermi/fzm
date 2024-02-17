@@ -42,7 +42,7 @@ pub fn main() !void {
     try fzm.addCommand(.{ .name = "uninstall", .func = undefined, .description = "Uninstall a Zig version" });
     try fzm.addCommand(.{ .name = "use", .func = undefined, .description = "Change Zig version" });
 
-    var got_command = fzm.parseCommand();
+    const got_command = fzm.parseCommand();
 
     if (got_command) |index| {
         var _command = fzm.getCommand(index);

@@ -119,10 +119,10 @@ pub inline fn format(self: *Self, comptime text: []const u8, data: anytype) !voi
 /// renders with the given data before returning an owned slice with the content.
 /// Caller must free the memory.
 pub fn mustacheFormat(self: *Self, template: []const u8, data: anytype) !usize {
-    const mustache = try zap.MustacheNew(template);
-    defer zap.MustacheFree(mustache);
+    var mustache = try zap.Mustache.fromData(template);
+    defer mustache.deinit();
 
-    const result = zap.MustacheBuild(mustache, data);
+    const result = mustache.build(data);
     defer result.deinit();
 
     if (result.str()) |s| {
