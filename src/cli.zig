@@ -1,4 +1,4 @@
-// Copyright © 2023 Matthew Winter
+// Copyright © 2023-2024 Matthew Winter
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -90,8 +90,8 @@ pub fn init(allocator: Allocator) Self {
         .commands = _commands,
 
         // TODO: Populate `no_color=true` when the 'NO_COLOR' environment variable present and not an empty string (regardless of its value)
-        .stdout = in_colour.init(std.io.getStdOut(), .auto, false),
-        .stderr = in_colour.init(std.io.getStdErr(), .auto, false),
+        .stdout = in_colour.init(allocator, std.io.getStdOut(), .auto, false),
+        .stderr = in_colour.init(allocator, std.io.getStdErr(), .auto, false),
 
         .arch = builtin.target.cpu.arch.genericName(),
         .os = @tagName(builtin.target.os.tag),
@@ -192,7 +192,7 @@ fn padSpaces(self: *Self, size: u64) Allocator.Error![]const u8 {
 /// Constructs the data struct that contains all of the CLI attributes into
 /// an acceptable format to be passed to Mustache for processing the provided
 /// template before printing the results to STDOUT
-fn printHelpTemplate(self: *Self, template: []const u8) !usize {
+fn printHelpTemplate(self: *Self, template: []const u8) !void {
     // Calculate maximum command name length
     var maxNameLength: u64 = 0;
     for (self.commands.items) |command| {
@@ -233,8 +233,8 @@ pub fn printVersionAndExit(self: *Self) noreturn {
     @setCold(true);
 
     const template =
-        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} {{{app.os}}}/{{{app.arch}}}
-        \\{{{app.copyright}}}
+        \\{{style.reset}}{{style.green}}{{app.name}}{{style.reset}}, {{app.version}} {{app.os}}/{{app.arch}}
+        \\{{app.copyright}}
         \\
     ;
 
@@ -248,19 +248,19 @@ pub fn printHelpAndExit(self: *Self) noreturn {
     @setCold(true);
 
     const template =
-        \\{{{style.reset}}}{{{style.green}}}{{{app.name}}}{{{style.reset}}}, {{{app.version}}} {{{app.os}}}/{{{app.arch}}}
-        \\{{{app.description}}}
+        \\{{style.reset}}{{style.green}}{{app.name}}{{style.reset}}, {{app.version}} {{app.os}}/{{app.arch}}
+        \\{{app.description}}
         \\
-        \\{{{style.yellow}}}USAGE:{{{style.reset}}}
-        \\   {{{style.green}}}{{{app.name}}}{{{style.reset}}} [command] [options] [args]
+        \\{{style.yellow}}USAGE:{{style.reset}}
+        \\   {{style.green}}{{app.name}}{{style.reset}} [command] [options] [args]
         \\
-        \\{{{style.yellow}}}COMMANDS:{{{style.reset}}}
+        \\{{style.yellow}}COMMANDS:{{style.reset}}
         \\{{#commands}}
-        \\   {{{style.green}}}{{{name}}}{{{style.reset}}}{{{padding}}}{{{description}}}
+        \\   {{style.green}}{{name}}{{style.reset}}{{padding}}{{description}}
         \\{{/commands}}
         \\
-        \\{{{style.yellow}}}COPYRIGHT:{{{style.reset}}}
-        \\   {{{app.copyright}}}
+        \\{{style.yellow}}COPYRIGHT:{{style.reset}}
+        \\   {{app.copyright}}
         \\
     ;
 

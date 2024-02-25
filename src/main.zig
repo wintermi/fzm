@@ -1,4 +1,4 @@
-// Copyright © 2023 Matthew Winter
+// Copyright © 2023-2024 Matthew Winter
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,34 +19,34 @@ const heap = std.heap;
 const io = std.io;
 const mem = std.mem;
 const process = std.process;
-const Allocator = mem.Allocator;
+const Allocator = std.mem.Allocator;
 
 pub fn main() !void {
     var gpa = heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
     defer _ = gpa.deinit();
 
-    var fzm = cli.init(allocator);
-    defer fzm.deinit();
+    var app = cli.init(allocator);
+    defer app.deinit();
 
-    fzm.name = "fzm";
-    fzm.version = mem.trim(u8, @embedFile("./VERSION"), "\n \r\t");
-    fzm.description = "A fast and simple Zig version manager, built in Zig";
-    fzm.author = "Matthew Winter";
-    fzm.copyright = "Copyright © 2023 Matthew Winter";
+    app.name = "fzm";
+    app.version = mem.trim(u8, @embedFile("./VERSION"), "\n \r\t");
+    app.description = "A fast and simple Zig version manager, built in Zig";
+    app.author = "Matthew Winter";
+    app.copyright = "Copyright © 2023-2024 Matthew Winter";
 
-    try fzm.addCommand(.{ .name = "current", .func = undefined, .description = "Print the current Zig version" });
-    try fzm.addCommand(.{ .name = "install", .func = undefined, .description = "Install a new Zig version" });
-    try fzm.addCommand(.{ .name = "list", .func = undefined, .description = "List all locally installed Zig versions" });
-    try fzm.addCommand(.{ .name = "list-remote", .func = undefined, .description = "List all available remote Zig versions" });
-    try fzm.addCommand(.{ .name = "uninstall", .func = undefined, .description = "Uninstall a Zig version" });
-    try fzm.addCommand(.{ .name = "use", .func = undefined, .description = "Change Zig version" });
+    try app.addCommand(.{ .name = "current", .func = undefined, .description = "Print the current Zig version" });
+    try app.addCommand(.{ .name = "install", .func = undefined, .description = "Install a new Zig version" });
+    try app.addCommand(.{ .name = "list", .func = undefined, .description = "List all locally installed Zig versions" });
+    try app.addCommand(.{ .name = "list-remote", .func = undefined, .description = "List all available remote Zig versions" });
+    try app.addCommand(.{ .name = "uninstall", .func = undefined, .description = "Uninstall a Zig version" });
+    try app.addCommand(.{ .name = "use", .func = undefined, .description = "Change Zig version" });
 
-    const got_command = fzm.parseCommand();
+    const got_command = app.parseCommand();
 
     if (got_command) |index| {
-        var _command = fzm.getCommand(index);
-        _command.func(&fzm) catch |err| switch (err) {
+        var _command = app.getCommand(index);
+        _command.func(&app) catch |err| switch (err) {
             // BrokenPipe is in most cases expected. It will be triggered just by doing
             // `aniz database | head -n1`. It is not an error for our program so let's
             // ignore it and exit cleanly.
@@ -57,5 +57,5 @@ pub fn main() !void {
         return;
     }
 
-    fzm.printHelpAndExit();
+    app.printHelpAndExit();
 }

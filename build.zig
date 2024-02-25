@@ -1,4 +1,4 @@
-// Copyright © 2023 Matthew Winter
+// Copyright © 2023-2024 Matthew Winter
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const zap_dep = b.dependency("zap", .{
+    const mustache_dep = b.dependency("mustache", .{
         .target = target,
         .optimize = optimize,
     });
@@ -35,8 +35,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     exe.root_module.addImport("clap", clap_dep.module("clap"));
-    exe.root_module.addImport("zap", zap_dep.module("zap"));
-    exe.linkLibrary(zap_dep.artifact("facil.io"));
+    exe.root_module.addImport("mustache", mustache_dep.module("mustache"));
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);

@@ -1,4 +1,4 @@
-// Copyright © 2023 Matthew Winter
+// Copyright © 2023-2024 Matthew Winter
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,9 @@
 // limitations under the License.
 
 const std = @import("std");
-const zap = @import("zap");
+const mustache = @import("mustache");
 
+const Allocator = std.mem.Allocator;
 const File = std.fs.File;
 
 /// In Colour
@@ -30,6 +31,9 @@ pub const UseColour = enum {
     never,
     auto,
 };
+
+/// Memory Allocator used by the Command Line Applications
+allocator: Allocator,
 
 /// Identifies the Buffered Stream we will write to, e.g. `stdout`
 out: BufferedStream,
@@ -80,8 +84,9 @@ pub const ansi_codes = .{
 /// an empty string (regardless of its value) to prevent the use of ANSI Colours.
 ///
 /// Deinitialize using `deinit` to flush buffers and deallocate memory.
-pub fn init(file: File, use_colour: UseColour, no_color: bool) Self {
+pub fn init(allocator: Allocator, file: File, use_colour: UseColour, no_color: bool) Self {
     return .{
+        .allocator = allocator,
         .out = std.io.bufferedWriter(file.writer()),
         .enable_ansi_colours = switch (use_colour) {
             .always => true,
@@ -109,8 +114,7 @@ pub inline fn write(self: *Self, bytes: []const u8) !usize {
 /// Render the format string using the provided data before writing to the buffer
 ///
 /// The format string must be comptime-known and may contain placeholders following
-/// this format:
-/// `{[argument][specifier]:[fill][alignment][width].[precision]}`
+/// this format:   `{[argument][specifier]:[fill][alignment][width].[precision]}`
 pub inline fn format(self: *Self, comptime text: []const u8, data: anytype) !void {
     return std.fmt.format(self.out.writer(), text, data);
 }
@@ -118,17 +122,8 @@ pub inline fn format(self: *Self, comptime text: []const u8, data: anytype) !voi
 /// Parses the [mustache](https://mustache.github.io/) logic-less template and
 /// renders with the given data before returning an owned slice with the content.
 /// Caller must free the memory.
-pub fn mustacheFormat(self: *Self, template: []const u8, data: anytype) !usize {
-    var mustache = try zap.Mustache.fromData(template);
-    defer mustache.deinit();
-
-    const result = mustache.build(data);
-    defer result.deinit();
-
-    if (result.str()) |s| {
-        return self.out.writer().write(s);
-    }
-    return 0;
+pub fn mustacheFormat(self: *Self, template: []const u8, data: anytype) !void {
+    return mustache.renderText(self.allocator, template, data, self.out.writer());
 }
 
 /// Buffered Stream Type
