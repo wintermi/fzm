@@ -13,9 +13,12 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ${{matrix.os}}
     strategy:
       matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
         zig-version:
           - master
     steps:
