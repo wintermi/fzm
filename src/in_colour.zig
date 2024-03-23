@@ -91,7 +91,7 @@ pub fn init(allocator: Allocator, file: File, use_colour: UseColour, no_color: b
         .enable_ansi_colours = switch (use_colour) {
             .always => true,
             .never => false,
-            .auto => !no_color and std.os.isatty(file.handle),
+            .auto => !no_color and std.posix.isatty(file.handle),
         },
     };
 }

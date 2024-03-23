@@ -276,7 +276,7 @@ pub fn printHelpAndExit(self: *Self) noreturn {
 /// Flushes `stdout` and `stderr` before exitting with the given code.
 pub fn exit(self: *Self, code: u8) noreturn {
     self.flush();
-    std.os.exit(code);
+    std.posix.exit(code);
 }
 
 /// Flush the `stdout` and `stderr` buffers.
