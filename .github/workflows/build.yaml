@@ -20,6 +20,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
         zig-version:
+          - 0.12.0
           - master
     steps:
       - uses: actions/checkout@v4.1.1

@@ -6,7 +6,7 @@
         // Zig libs
         .clap = .{
             .url = "https://github.com/Hejsil/zig-clap/archive/refs/heads/master.tar.gz",
-            .hash = "12200103e7b4a0cb162f2912df4fe97914024a25b5c9fcce6ea4119744f3f2a7f24e",
+            .hash = "122014e73fd712190e109950837b97f6143f02d7e2b6986e1db70b6f4aadb5ba6a0d",
         },
         .mustache = .{
             .url = "https://github.com/batiati/mustache-zig/archive/refs/heads/master.tar.gz",
