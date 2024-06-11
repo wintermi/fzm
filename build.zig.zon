@@ -6,11 +6,14 @@
         // Zig libs
         .clap = .{
             .url = "https://github.com/Hejsil/zig-clap/archive/refs/heads/master.tar.gz",
-            .hash = "122014e73fd712190e109950837b97f6143f02d7e2b6986e1db70b6f4aadb5ba6a0d",
+            .hash = "1220c900c70daf3e715fad6f266ec14b1d0f5e6c2d3f34b32142f60306cb9b5e5f05",
         },
         .mustache = .{
-            .url = "https://github.com/batiati/mustache-zig/archive/refs/heads/master.tar.gz",
-            .hash = "12205538be57d7c0b92806e87c500c50bfcecb9b083adea8b2fdbec99f46598c922d",
+            // Fork the repository to make it work with the latest Zig version (0.13.0)
+            //.url = "https://github.com/batiati/mustache-zig/archive/refs/heads/master.tar.gz",
+
+            .url = "https://github.com/wintermi/mustache-zig/archive/refs/heads/master.tar.gz",
+            .hash = "1220897a76b954e9811b760ba8e465d6c2c41ad3f69c8ce30c708e24af8ff12cb182",
         },
     },
 }

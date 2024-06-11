@@ -19,5 +19,5 @@
 *.d
 
 # Exclude `zig` compiled files and executables
-zig-cache/
+.zig-cache/
 zig-out/
