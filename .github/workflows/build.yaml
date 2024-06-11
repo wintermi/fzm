@@ -20,9 +20,9 @@ jobs:
           - ubuntu-latest
           - macos-latest
         zig-version:
-          - 0.12.0
+          - 0.13.0
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.6
         with:
           submodules: true
       - name: Setup Zig ${{ matrix.zig-version }}
